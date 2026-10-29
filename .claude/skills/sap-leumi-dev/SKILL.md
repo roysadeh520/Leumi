@@ -24,7 +24,7 @@ Talk to the user in Hebrew. Code comments in Hebrew.
 
 ## Phase 2 - Plan together (STOP point)
 
-Present the plan in Hebrew, short and in tables, then **wait for approval**. Ask decisions with AskUserQuestion when they change what gets built.
+**Always run the question wizard first** (AskUserQuestion, up to 4 questions per round, recommended option first), even when the user asked "only a plan" or "only a summary". Ask every decision point, C/D approval and few-files-vs-correct conflict through the wizard, in as many rounds as needed. Only after the answers, present the plan summary in Hebrew, short and in tables, reflecting the answers, then **wait for approval** before developing.
 
 The plan contains:
 
@@ -103,6 +103,7 @@ The goal is **as few files as possible while keeping the development correct**. 
 Templates: `references/deliverable-templates.md`.
 
 ### README.md - one file, in creation order
+**Binding example: `references/readme-example.md`.** Every README must match its structure and level of detail: for every object the exact place to create it (ADT menu path, or the GUI transaction such as SE11 / SE93 / SM30 / SLG0 when the object is created in SAP GUI), the values to fill in the form, which file from `src/` goes into which tab, and a check after each part.
 - Short "how it works" for the user (test-run list, update button, what is shown).
 - Components at Clean Core level C or D (if any) with the approval, and every class with the reason it exists.
 - "What you paste and what is generated": 📋 = file in `src/` to paste into the object created in ADT; ⚙️ = generated or a form (service binding, Fiori app, IAM app, business catalog, domain, data element).
