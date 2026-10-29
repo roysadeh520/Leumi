@@ -1,0 +1,497 @@
+
+
+
+
+מסמך אפיון פונקציונלי וטכני
+
+
+טיפול במפתחות העמסה -שטח, עובדים, משרות כולל CDS-ים ודו"חות נלווים
+
+
+
+מודולים מעורבים: CO, RE, FM
+
+
+
+
+
+
+ 
+
+א. זיהוי מסמך
+תאריך	משימה ALM	גרסה	שם הקובץ	שם המסמך הBBP
+בו מופיעה הדרישה
+				
+
+ב. בקרה
+הערות	חתימה	אחראי 	הוכן בעזרת	תאריך
+		סרגיי ליברמן	מיישם מוביל	
+		סרגיי ליברמן	ראש צוות CO	
+			מפתח ABAP	
+		סיוון אברמוביץ'	מנהל פרויקט מטעם הספק	
+		הילה בן מרגו	מנהל פרויקט מטעם העסק	
+		עינת ארביב	מנהל הפרויקט – בנק לאומי	
+			מוביל עסקי	
+
+מעקב שינויים
+הערות	סעיף	עמוד	סוג שינוי (*)	מס'
+				
+
+(*)סוג שינוי: ה-הוספה, מ-מחיקה, ע- עדכון
+בהערות רצוי לתעד את סיבת השינוי, כגון: "תוצאות מבדק", "שינויים ותוספות" וכד.
+
+
+
+ 
+תוכן עניינים
+
+
+1.אפיון פונקציונאלי	4
+2.אפיון טכני...	7
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1.	אפיון פונקציונאלי
+האפיון מכסה מספר פיתוחים בתוכנית עבודה, חלקם באבן דרך נוכחית (אינטגרציה בין RE ו-CO והעשרת CDS-ים לדו"חות) וחלקם באבני דרך הבאות (טיפול בכמויות כח אדם ומפתחות חלוקת שכ"ד).
+השיקול לאחד את הפיתוחים הינו טיפול באותו עולם תוכן - מפתחות העמסה (נתוני מפתח סטטיסטיים) אשר מנוהלים ב-RE (שטח) וב-CDS-ים שפותחו ב-HR - כמויות עובדים ומשרות לפי יחידה ארגונית ותקציבית והצלבה של שיוך נדל"ן וכמות עובדים (אכלוס בנייני קשב).
+הפיתוח כולל בעיקר בניית CDSים, קריאות API לרישום מפתחות העמסה של עובדים ושטחים ו-BAPI של תקציב כיבוד:
+-	בניית CDS אשר "מתרגם" נתוני שטח ב-RE בהתאם לכללי ייחוס של אובייקטי נדל"ן למרכזי עלות ב-CO. מבחינה טכנית יהיו 2 CDS – ים:
+o	מפורט לטובת האיחוד בין טבלאות נדל"ן של נתוני יחידות שכיאות ונתוני שטח ל-CDS של כללי ייחוס.
+o	מסוכם לפי מרכז עלות, שטח ברוטו / נטו לפי תקופות תוקף, יחידת שכירות
+-	CDS-ים חדשים ישמשו גם להמשך התוכנית וגם באופן עצמאי לטובת ניתוח שטח מבחינת מרכזי עלות.
+-	הערה לגבי אינטגרציה בין RE ל-CO – אמנם קיים מהלך סטנדרטי של העברת נתוני שטח מ-RE למפתחות סטטיסטיים ב-CO אך המערכת הסטנדרטית לא מתרגמת את השיוך של יחידות שכירות למרכז עלות (כלל ייחוס) ולכן בכל מקרה נדרש עיבוד נתונים על מנת לרשום את נתוני השטח למרכזי עלות.
+-	אפליקציה לרישום מפתחות סטטיסטיים למרכזי עלות – גם לטובת מחזורי העמסה וגם לטובת CDS- אשר יאחדו נתונים כספיים ותקציביים עם נתונים סטטיסטיים לטובת הדו"חות (פירוט בהמשך). אפליקציה תופעל בתדירות חודשית במסגרת תהליכי סגירת תקופה, לפני הפעלת מחזורי העמסה. בעתיד ניתן יהיה לתזמן ריצה אוטומטית (בכל מקרה, זה חלק מרצף פעולות של סגירת תקופה). האפליקציה תתבסס על הזנת הפרמטרים הבאים ותאפשר 3 אפשרויות עיבוד:
+o	תקופת חתך (חודש סגירה).
+o	נתוני שטח (בהתאם ל-CDS שהוסבר קודם).
+o	נתוני עובדים ומשרות לפי שיוך תקציבי וארגוני (הסבר בהמשך).
+o	נתוני עובדים ומשרות לפי שיוך נדל"ן (הסבר בהמשך).
+o	סמן של ריצת מבחן. במידה ומדובר בריצת מבחן, תוצג טבלה עם התוכן הרלוונטי (CDS) – לדוגמה, תקופה / מרכז עלות / שטח נטו / שטח ברוטו. במידה ומודבר בריצת עדכון, האפליקציה תבצע רישום של מפתחות סטטיסטיים במערכת.
+-	הערת Clean Core – אפליקציה שמבוססת פרמטרים צריכה להיבנות תוך שימוש ב- RAP on stack (tier A) או ABAP Wrapper (tier B). העדיפות כמובן להיות ב-A אבל לא בטוח שמגבלות של CDS-ים משוחררים ל-Cloud dev יאפשרו זאת. החלטה תתקבל בשלב המימוש יחד עם המפתח.
+הסבר לגבי רישום נתוני עובדים  ומשרות לפי שיוך  תקציבי וארגוני – צוות HR פיתח CDS אשר מרכז נתוני עובדים ומשרות ברמה חודשית לפי המפתח של יחידה ארגונית (מקבילה ברוב המקרים למרכז עלות), יחידה תקציבית (מקבילה מרכז קרנות ומרכז עלות לצורך בקרת תקציב) ומרכז עלות של בניין נדל"ן (פירוט בהמשך).
+-	התוכנית תיצור רישומים של 4 מפתחות סטטיסטיים באמצעות API סטנדרטי, כל חודש:
+o	משרות לפי יחידה ארגונית (מרכז עלות מפורט באורך 8 ספרות)
+o	משרות לפי יחידה תקציבית (מרכז עלות באורך 3 ספרות).
+o	עובדים לפי יחידה ארגונית (מרכז עלות מפורט באורך 8 ספרות)
+o	עובדים לפי יחידה תקציבית (מרכז עלות באורך 3 ספרות).
+הסבר לגבי רישום נתוני עובדים ומשרות לפי שיוך לנדל"ן – מיועד בעיקר עבור היחידות בקשב ואולי במתחים נוספים, על בסיס אותו CDS שפותח ב-HR.
+-	לכל בניין שרלוונטי לתהליך יוקמו 4 מפתחות סטטיסטיים (מהלך סטנדרטי, לא קשור לפיתוח), על מנת לאפשר גמישות מרבית בניתוח וביכולות העמסה:
+o	בניין ** - משרות לפי יחידה ארגונית מאכלסת (מרכז עלות מפורט באורך 8 ספרות)
+o	בניין ** - משרות לפי יחידה תקציבית אליה שייכות היחידות המאכלסות (מרכז עלות באורך 3 ספרות).
+o	בניין ** - עובדים לפי יחידה ארגונית מאכלסת (מרכז עלות מפורט באורך 8 ספרות)
+o	בניין ** - עובדים לפי יחידה תקציבית אליה שייכות היחידות המאכלסות (מרכז עלות באורך 3 ספרות).
+-	התוכנית תפעיל API סטנדרטי לרישום מפתחות סטטיסטיים לפי נתוני בניין.
+-	כמובן התנאי המוקדם להצלחת האפליקציות האלה הינו תחזוקת השיוכי של יחידות ארגוניות ליחידות תקציב ומרכזי עלות של בנייני נדל"ן באמצעות אפליקציה שפותחה ב-HR.
+טיפול בתקציב כיבוד (כריכים) – תקצוב כריכים מתבצע מדי חודש בהתאם לכמות עובדים (או משרות, יוגדר כפרמטר לבחירת משתמש) – במילים אחרות, מקור המידע  לתקצוב הינו CDS-ים בפיתוח הזה. 
+-	אפליקציה תתבסס על מפתחות של עובדים או משרות אשר חושבו ונרשמו בשלבים קודמים (רק עבור סניפים) ותפעיל BAPI לרישום תקציב (העברה מיחידת רזרבה למרכזי קרנות של סניפים).
+-	הפרמטרים של אפליקציה:
+o	תקופת חתך
+o	מפתח כמותי
+o	פריט התחייבות
+o	מרכז קרנות מקור (בדרך כלל יחידת רזרבה של חט' בנקאית).
+-	יוקם CDS עם נתונים תומכים (יוצג בריצת מבחן):
+שדה
+קוד חברה
+שנה.חודש
+מפתח סטטיסטי
+מרכז עלות
+כמות
+תעריף
+תקציב
+
+-	הסבר לגבי קביעת תעריף הכיבוד ברמת הסניף – יתבסס על אפליקציות סטנדרטיות: יוגדר סוג פעילות של כיבוד באמצעות "נהל סוגי פעילות" ומשתמש יזין תעריף לכל סניף (התעריף מייצג עלות לעובד לחודש) באמצעות "ערוך מחירים עבור סוגי פעילות". האפליקציה של תקציב כריכים תמצא את התעריף ב-CDS סטנדרטי של תעריפי פעילויות.
+ריצות מבחן של אפליקציות יציגו את התוכן של CDS-ים מתאימים (שטחים לפי יחידות / עובדים לפי יחידות, נתוני תקציב כריכים).
+
+יצירת CDS-ים עם חיבור של נתוני עלויות, תקציב ומפתחות סטטיסטיים – ישמשו להצגת עלויות, שטח, עובדים באותו דו"ח, גם לטובת ניתוח העמסות וגם לדו"חות תקופתיים תקופתיים. בהמשך CDS ים אלה יכילו גם נתונים נוספים לטובת ניתוחי עומק:
+-	מעל CDS פיננסי בסיסי ייבנה CDS מצומצם יותר אליו יתווספו של מפתחות סטטיסטיים. לא ניתן לבצע איחוד כזה באמצעות Join (יגרום לשכפול של המון שורות), לכן יהיה שימוש במנגנון של Union All (תתווסף שורה למפתח סטטיסטי לתקופה ברמת מרכז).
+-	מעל CDS של תקציב מול ביצוע יתבצע מהלך דומה.
+
+
+
+תיעוד פרמטרים למיישמים ובודקים:
+
+ZCO_HC_SKF_DET – עובדים ברמת יח' ארגונית (יתוחזק ערך HCDET)
+ZCO_POS_SKF_DET – משרות ברמת יח' ארגונית (יתוחזק ערך POSDET)
+ZCO_HC_SKF_TOT – עובדים ברמת יח' תקציבית (יתוחזק ערך HCTOT)
+ZCO_POS_SKF_TOT (יתוחזק ערך POSTOT)
+ZCO_POS_SKF_TOT – משרות ברמת יח' תקציבית (יתוחזק ערך POSTOT)
+ZCO_REFRESH_ACTTP  - סוג פעילות לניהול תעריך כריכים + תחזוקת תעריף למרכזי קרנות של סניפים.
+ZFM_REFRESH_BUDDOC – סוג מסמך שך תקציב כיבוד
+ZFM_UPD_BUDTYPE – סוג תקציב מעודכן (Y150), משמש בעיקר לניהול כל הסטות התקציב
+4 פרמטרים למרכזי עלות של בניינים רלוונטיים – מספר של מ.עלות + סיומות: HCD, HCT, POSD, POST, לדוגמה B1010001POSD.
+
+2.	אפיון טכני
+
+תיאור טכני מפורט
+שם המפתח:  
+Batch Input / Dialog Program
+Transaction code	<Code>	<Description in English>
+<תאור בעברית>
+Fiori app		
+ABAP Program	<Code>	<Description in English>
+<תאור בעברית>
+Function Module
+Function Group	<Code>	<Description in English>
+Function Module	<Code>	<Description in English>
+
+Package	<Code>	
+Message Class	<Code>	
+
+דירוג CLEAN CORE : A / B /  C / D 
+
+ 
+פירוט טכני של הפיתוח הנדרש
+
+1.	האפיון מטפל בניהול ועדכון מפתחות סטטיסטיים של שטח, כמות משרות וכמות עובדים ותהליכים משלימים (כגון תקצוב כריכים):
+-	יצירת CDS עם ריכוז הנתונים של מפתחות סטטיסטיים עם נתוני שטח, משרות ועובדים.
+-	תוכנית לרישום ערכים של מפתחות סטטיסטיים באמצעות API סטנדרטי.
+-	תוכנית לתקצוב כריכים בהתאם לכמות עובדים
+2.	ריכוז נתוני שטח, נדל"ן ומרכזי עלות:
+-	ליצור CDS ZCO_RESTATKEYDATADET ("פירוט נתוני שטח") באמצעות Join Left בין VIBDRO ל-  VIBDMEAS(לקחת את כל השדות מהטבלאות) לפי:
+שדה לטובת Join	הסבר / תנאי
+INTRENO	
+VIBDMEAS-MEAS	שווה ל-R100 או R101
+-	Join של הטבלה המאוחדת עם I_ORDERSETTLEMENTRULE לפי:
+שדה לטובת Join	הסבר / תנאי
+VIBDRO-OBJNR	I_ORDERSETTLEMENTRULE-CONTROLLINGOBJECT
+I_ORDERSETTLEMENTRULE- ValidityEndFiscalYear+ ValidityEndFiscalPeriod	ריק או גדול מהתקופה הנוכחית. לדוגמה אם התקופה הנוכחית הינה 009.2026 אז שדות התוקף צריכים להיות ריקים (לא מוגבל) או 2026009 או מאוחר יותר
+-	לקחת את השדות הבאים מ- I_ORDERSETTLEMENTRULE
+AccountAssignmentType
+CostCenter
+SettlementPercentageRate
+ValidityStartFiscalYear
+ValidityEndFiscalYear
+ValidityStartFiscalPeriod
+ValidityEndFiscalPeriod
+
+3.	סיכום נתונים: ליצור CDS ZCO_RESTATKEYDATATOT ("סיכום נתוני שטח") על בסיס CDS מהסעיף ולבנות מבט מצומצם. חשוב שה-CDS הזה והקודם יוגדרו כאנליטי כדי להיות זמין בשאילתות:
+שדה	מקור
+OBJNR	VIBDRO
+IMKEY	VIBDRO
+XMETXT	VIBDRO
+ACCOUNTASSIGNMENTTYPE	I_ORDERSETTLEMENTRULE
+COSTCENTER	I_ORDERSETTLEMENTRULE
+MEAS	VIBDMEAS
+MEASVALUE	VIBDMEAS
+MEASUNIT	VIBDMEAS
+VALIDTO	VIBDMEAS
+VALIDFROM	VIBDMEAS
+4.	שני ה-CDS צריכים להיות מסומנים כאנליטיים.
+5.	ליצור אפליקציה  ZCO_SKF_MANAGE "עדכון מפתחות העמסה" + טראנזאקציה עם אותו קוד + אריח. התוכנית תרוץ על CDS שנוצר לעיל ותפעיל שירות או BAPI לעדכון ערכים של מפתחות סטטיסטיים של שטח נטו וברוטו. לפי התיעוד של SAP, מבחינת Clean core צריך להשתמש ב-RAP on stack (A) או ב-ABAP Wrapper (נהיה ב-B). לא בטוח ש-RAP on stack  יתאים בגלל שימוש ב-classic API ובגלל ש-CDS-ים לא בהכרח משוחררים ל-Cloud.
+-	פרמטרים:
+שם הפרמטר	הגדרות	הסבר
+תקופת חתך	כמו  I_JournalEntryItemCube-FISCALYEARPERIOD	חובה, ערך יחיד, רצוי לאפשר חיפוש לפי ההגדרות של השדה ב-CDS
+נושא:	בחירת אופציה (single): 
+
+	נתוני שטח (נניח P1)
+	נתוני עובדים לפי שיוך תקציבי (נניח P2)
+	נתוני עובדים לפי מיקום נדל"ן (נניח P3)	חובה לסמן אופציה אחת
+ריצת מבחן	תיבת סימון	ברירת מחדל – מסומן (ריצת מבחן)
+6.	אם אופציה P1 "נתוני שטח" סומנה, התוכנית תבצע משיכת נתוני שטח מנדל"ן ורישום כמפתחות סטטיסטיים לטובת העמסות בהתאם לכללי ייחוס של יחידות השכירות (אינטגרציה עם RE).
+7.	אם ריצת מבחן מסומנת – להציג את התוכן של ZCO_RESTATKEYDATATOT (CDS מסוכם) כ-fiori list ולאפשר מעבר להצגה של ZCO_RESTATKEYDATADET (CDS מפורט).
+8.	אם מדובר בריצת עדכון – לרוץ על כל השורות ב-CDS המצומצם ZCO_RESTATKEYDATATOT כאשר ValidityEndFiscalYear ו- ValidityEndFiscalPeriod ריקים או גדולים מ-"תקופת חתך" במסך פרמטרים. הפורמט של תקופת חתך YYYYMMM.
+-	להפעיל API_STSTCLKEYFIGUREDOCUMENT:
+כותרת	A_STATISTICALKEYFIGUREDOCMENT
+ControllingArea	1000 , קבוע
+PostingDate	תאריך אחרון של תקופת חתך. לדוגמה, 30.09.2026 עבור 2026009
+DocumentDate	תאריך נוכחי
+DocumentHeaderText	"נתוני שטח - <תקופת חתך>"
+
+-	עבור כל שורה ב- ZCO_RESTATKEYDATATOT(לפי התיעוד נראה שמדובר ב- A_STSTCLKEYFIGUREDOCMENTITEM):
+שורה	A_STSTCLKEYFIGUREDOCMENTITEM
+שדה מקור ב- ZCO_RESTATKEYDATATOT
+StatisticalKeyFigure	MEAS
+CostCenter	COSTCENTER
+FiscalYear	לקחת שנה מ-ValidFrom
+FiscalPeriod	לקחת חודש מ-ValidFrom
+Quantity	MEASVALUE
+QuantityUnit	MEASUNIT
+
+9.	אם אופציה P2 "נתוני עובדים לפי שיוך תקציבי" סומנה – התוכנית תבצע רישום מספר עובדים ומספר משרות ברמה מפורטת (יחידות ארגוניות) וברמה מסכמת (יחידות תקציב).
+10.	רישום מספר עובדים ברמה מפורטת: לרוץ על כל השורות ב-CDS ZC_HR_BudgetReport כאשר חודש ושנה של KEYDATE  שווים לתקופת חתך במסך פרמטרים. הפורמט של תקופת חתך YYYYMMM.
+-	עבור כל שורה להפעיל  API_STSTCLKEYFIGUREDOCUMENT (דומה לאופציה קודמת):
+כותרת	A_STATISTICALKEYFIGUREDOCMENT
+ControllingArea	1000 , קבוע
+PostingDate	KEYDATE
+DocumentDate	תאריך נוכחי
+DocumentHeaderText	"נתוני עובדים ברמת יח ארגונית-<תקופת חתך>"
+-	עבור כל שורה (לפי התיעוד נראה שמדובר ב- A_STSTCLKEYFIGUREDOCMENTITEM):
+שורה	A_STSTCLKEYFIGUREDOCMENTITEM
+שדה מקור ב- ZC_HR_BudgetReport
+StatisticalKeyFigure	לשלוף מ-ZCA_PARAM לפי ZCO_HC_SKF_DET (יתוחזק ערך HCDET)
+CostCenter	ORGUNIT
+FiscalYear	לקחת שנה מתקופת חתך ממסך הפרמטרים
+FiscalPeriod	לקחת חודש מתקופת חתך ממסך הפרמטרים
+Quantity	HEADCOUNT
+
+11.	 רישום מספר משרות ברמה מפורטת (יחידות ארגוניות) - לחזור על אותה פעולה, רק עם פרמטרים שונים (צבוע בצהוב):
+כותרת	A_STATISTICALKEYFIGUREDOCMENT
+ControllingArea	1000 , קבוע
+PostingDate	KEYDATE
+DocumentDate	תאריך נוכחי
+DocumentHeaderText	"נתוני משרות ברמת יח ארגונית-<תקופת חתך>"
+
+שורה	A_STSTCLKEYFIGUREDOCMENTITEM
+שדה מקור ב- ZC_HR_BudgetReport
+StatisticalKeyFigure	לשלוף מ-ZCA_PARAM לפי ZCO_POS_SKF_DET (יתוחזק ערך POSDET)
+CostCenter	ORGUNIT
+FiscalYear	לקחת שנה מתקופת חתך ממסך הפרמטרים
+FiscalPeriod	לקחת חודש מתקופת חתך ממסך הפרמטרים
+Quantity	TOTALPOSITIONS
+12.	רישום מספר עובדים ברמה מסוכמת (יח' תקציב):
+-	הכנת מפתחות העמסה ברמה מסומכת (יחידות תקציביות) - לרוץ על כל השורות ב-CDS ZC_HR_BudgetReport כאשר חודש ושנה של KEYDATE  שווים לתקופת חתך במסך פרמטרים. הפורמט של תקופת חתך YYYYMMM וליצור סיכום של HEADCOUNT ו-TOTALPOSITIONS לפי KEYDATE ו- COSTCENTER. 
+-	רישום מספר עובדים ברמה יחידה תקציבית – זהה להפעלה קודמת של השירות, רק לרוץ על המבנה המסוכם לפי תאריך ומרכז עלות:
+כותרת	A_STATISTICALKEYFIGUREDOCMENT
+ControllingArea	1000 , קבוע
+PostingDate	KEYDATE
+DocumentDate	תאריך נוכחי
+DocumentHeaderText	"נתוני עובדים ברמת יח תקציבית-<תקופת חתך>"
+
+שורה	A_STSTCLKEYFIGUREDOCMENTITEM
+שדה מקור במבנה המסוכם לפי תאריך ו-COSTCENTER   על בסיס ZC_HR_BudgetReport
+StatisticalKeyFigure	לשלוף מ-ZCA_PARAM לפי ZCO_HC_SKF_TOT (יתוחזק ערך HCTOT)
+CostCenter	COSTCENTER
+FiscalYear	לקחת שנה מתקופת חתך ממסך הפרמטרים
+FiscalPeriod	לקחת חודש מתקופת חתך ממסך הפרמטרים
+Quantity	HEADCOUNT
+
+-	רישום מספר משרות ברמה יחידה תקציבית – זהה להפעלה קודמת של השירות, רק לרוץ על המבנה המסוכם לפי תאריך ומרכז עלות, עם פרמטרים שונים:
+כותרת	A_STATISTICALKEYFIGUREDOCMENT
+ControllingArea	1000 , קבוע
+PostingDate	KEYDATE
+DocumentDate	תאריך נוכחי
+DocumentHeaderText	"נתוני משרות ברמת יח תקציבית-<תקופת חתך>"
+
+שורה	A_STSTCLKEYFIGUREDOCMENTITEM
+שדה מקור ב- ZC_HR_BudgetReport
+StatisticalKeyFigure	לשלוף מ-ZCA_PARAM לפי ZCO_POS_SKF_TOT (יתוחזק ערך POSTOT)
+CostCenter	COSTCENTER
+FiscalYear	לקחת שנה מתקופת חתך ממסך הפרמטרים
+FiscalPeriod	לקחת חודש מתקופת חתך ממסך הפרמטרים
+Quantity	TOTALPOSITIONS
+
+13.	אם נבחר אופציה P3 "נתוני עובדים לפי מיקום נדל"ן": 
+-	רישום מספר עובדים ברמה מפורטת (יחידות ארגוניות) - לרוץ על כל השורות ב-CDS ZC_HR_BudgetReport כאשר חודש ושנה של KEYDATE  שווים לתקופת חתך במסך פרמטרים. הפורמט של תקופת חתך YYYYMMM.
+-	כמו בפעמים הקודמות, עבור כל שורה להפעיל API_STSTCLKEYFIGUREDOCUMENT:
+כותרת	A_STATISTICALKEYFIGUREDOCMENT
+ControllingArea	1000 , קבוע
+PostingDate	KEYDATE
+DocumentDate	תאריך נוכחי
+DocumentHeaderText	"עבדים לפי מיקום ברמת יח ארגונית-<תקופת חתך>"
+
+-	עבור כל שורה:
+שורה	A_STSTCLKEYFIGUREDOCMENTITEM
+שדה מקור ב- ZC_HR_BudgetReport
+StatisticalKeyFigure	לשלוף מ-ZCA_PARAM לפי NAME = REALESTATECOSTCENTER בתוספת HCD (קביעת מפתח סטטיסטי לפי מרכז עלות של בניין, לדוגמה B1010001HCD)
+CostCenter	ORGUNIT
+FiscalYear	לקחת שנה מתקופת חתך ממסך הפרמטרים
+FiscalPeriod	לקחת חודש מתקופת חתך ממסך הפרמטרים
+Quantity	HEADCOUNT
+
+-	רישום מספר משרות לפי מיקום ברמת יח ארגוניות - לחזור על אותה פעולה, רק עם פרמטרים שונים:
+כותרת	A_STATISTICALKEYFIGUREDOCMENT
+ControllingArea	1000 , קבוע
+PostingDate	KEYDATE
+DocumentDate	תאריך נוכחי
+DocumentHeaderText	"משרות לפי מיקום ברמת יח ארגונית-<תקופת חתך>"
+-	עבור כל שורה:
+שורה	A_STSTCLKEYFIGUREDOCMENTITEM
+שדה מקור ב- ZC_HR_BudgetReport
+StatisticalKeyFigure	לשלוף מ-ZCA_PARAM לפי NAME = REALESTATECOSTCENTER בתוספת POSD (קביעת מפתח סטטיסטי לפי מרכז עלות של בניין, לדוגמה B1010001POSD)
+CostCenter	ORGUNIT
+FiscalYear	לקחת שנה מתקופת חתך ממסך הפרמטרים
+FiscalPeriod	לקחת חודש מתקופת חתך ממסך הפרמטרים
+Quantity	TOTALPOSITIONS
+14.	המשך, עדיין אם נבחר P3 "נתוני עובדים לפי מיקום נדל"ן" - הכנת מפתחות העמסה ברמה מסומכת (יחידות תקציביות)
+-	לרוץ על כל השורות ב-CDS ZC_HR_BudgetReport כאשר חודש ושנה של KEYDATE  שווים לתקופת חתך במסך פרמטרים. הפורמט של תקופת חתך YYYYMMM וליצור סיכום של HEADCOUNT ו-TOTALPOSITIONS לפי:
+o	KEYDATE 
+o	REALESTATECOSTCENTER
+o	 COSTCENTER
+-	רישום מספר עובדים לפי מיקום נדל"ן ברמה יחידה תקציבית – זהה להפעלה קודמת של השירות, רק לרוץ על המבנה המסוכם לפי תאריך, מרכז עלות נדל"ן ומרכז עלות:
+כותרת	A_STATISTICALKEYFIGUREDOCMENT
+ControllingArea	1000 , קבוע
+PostingDate	KEYDATE
+DocumentDate	תאריך נוכחי
+DocumentHeaderText	"עובדים לפי מיקום ברמת יח תקציבית-<תקופת חתך>"
+
+שורה	A_STSTCLKEYFIGUREDOCMENTITEM
+שדה מקור במבנה מסוכם על בסיס ZC_HR_BudgetReport
+StatisticalKeyFigure	לשלוף מ-ZCA_PARAM לפי NAME = REALESTATECOSTCENTER בתוספת HCT (קביעת מפתח סטטיסטי לפי מרכז עלות של בניין, לדוגמה B1010001HCT)
+CostCenter	COSTCENTER
+FiscalYear	לקחת שנה מתקופת חתך ממסך הפרמטרים
+FiscalPeriod	לקחת חודש מתקופת חתך ממסך הפרמטרים
+Quantity	HEADCOUNT
+
+-	רישום מספר משרות לפי מיקום נדל"ן ברמה יחידה תקציבית – זהה להפעלה קודמת של השירות, רק לרוץ על המבנה המסוכם לפי תאריך ומרכז עלות, עם פרמטרים שונים:
+כותרת	A_STATISTICALKEYFIGUREDOCMENT
+ControllingArea	1000 , קבוע
+PostingDate	KEYDATE
+DocumentDate	תאריך נוכחי
+DocumentHeaderText	"מרות לפי מיקום ברמת יח תקציבית-<תקופת חתך>"
+
+
+שורה	A_STSTCLKEYFIGUREDOCMENTITEM
+שדה מקור במבנה מסוכם על בסיס ZC_HR_BudgetReport
+StatisticalKeyFigure	לשלוף מ-ZCA_PARAM לפי NAME = REALESTATECOSTCENTER בתוספת POST (קביעת מפתח סטטיסטי לפי מרכז עלות של בניין, לדוגמה B1010001POST)
+CostCenter	COSTCENTER
+FiscalYear	לקחת שנה מתקופת חתך ממסך הפרמטרים
+FiscalPeriod	לקחת חודש מתקופת חתך ממסך הפרמטרים
+Quantity	TOTALPOSITIONS
+
+15.	טיפול בתקציב כיבוד ("כריכים") – משיקולי הרשאות צריך ליצור אפליקציה ואריח נפרד – ZCO_REFRESH_BUD – "טיפול בתקציב כיבוד בסניפים". לפי התיעוד של SAP, מבחינת Clean core צריך להשתמש ב-RAP on stack (A) או ב-ABAP Wrapper (נהיה ב-B). לא בטוח ש-RAP on stack  יתאים בגלל שימוש ב-classic API ובגלל ש-CDS-ים לא בהכרח משוחררים ל-Cloud.
+16.	פרמטרים:
+שם הפרמטר	הגדרות	הסבר
+תקופת חתך	כמו  I_JournalEntryItemCube-FISCALYEARPERIOD	חובה, ערך יחיד, רצוי לאפשר חיפוש לפי ההגדרות של השדה ב-CDS
+מפתח חלוקה (עובדים או משרות)	להשתמש ב- I_StatisticalKeyFigureStdVH
+להביא StatisticalKeyFigure	ברירת מחדל - HCTOT
+פריט התחייבות	כמו COMMITMENTITEM	
+יחידת תקציבית (מקור)	כמו FUNDSCENTER	
+ריצת מבחן	תיבת סימון	ברירת מחדל - מסומן
+
+17.	לשלוף STATISTICALKEYFIGUREQUANTITY ולסכם לפי COSTCENTER מ- I_FINSTATISTICALKEYFIGUREITEM לפי:
+שדה	תנאי
+STATISTICALKEYFIGURE	מפתח חלוקה מהפרמטרים של האפליקציה
+FISCALYEARPERIOD	מפתח חלוקה מהפרמטרים של האפליקציה
+I_CostCenter- ZZ1_Unit_type_COS = '1'	לבצע right join עם ICcostCenter, במילים אחרות לקחת בחשבון של רק סניפים ZZ1_Unit_Type_COS = 1
+
+-	STATISTICALKEYFIGURE – מפתח חלוקה מהפרמטרים
+-	FISCALYEARPERIOD - ב
+18.	למצוא תעריף כיבוד לכל מרכז עלות (סניף) COSTCENTER מהשליפה הקודמת – לשלוף COSTRATETOTALAMOUNT מ- I_PLANCOSTRATE לפי:
+שדה	תנאי של שליפה/Join
+ACTIVITYTYPE	לשלוף מ-ZCA_PARAM לפי NAME = ZCO_REFRESH_ACTTP
+COSTCENTER	מרכזי עלות מהשליפה הקודמת
+PLANNINGCATEGORY	קבוע 'PLN'
+VALIDITYENDFISCALYEARPERIOD	לפי תקופת חתך מהפרמטרים
+
+19.	התוצאה תהיה ב-CDS חדש ZCO_REFRESHMENTCOST:
+שדה	הגדרה	מקור
+COMPANYCODE	כמו ב-I_COMPANYCODE	
+FISCALYEARPERIOD	כמו  I_JournalEntryItemCube-	I_FINSTATISTICALKEYFIGUREITEM
+STATISTICALKEYFIGURE	כמו ב- I_StatisticalKeyFigureStdVH	
+COSTCENTER	כמו I_COSRCENTER	
+STATISTICALKEYFIGUREQUANTITY		
+COSTRATETOTALAMOUNT		Join של FINSTATISTICALKEYFIGUREITEM עם I_PLANCOSTRATE לפי התנאים בסעיף הקודם
+BUDGETAMOUNT	חישוב של כמות * תעריף כיבוד: 	STATISTICALKEYFIGUREQUANTITY * COSTRATETOTALAMOUNT
+
+20.	אם ריצת מבחן מסומנת – להציג את התוכן של CDS  ZCO_REFRESHMENTCOST כרשימת פיורי.
+21.	אם מדובר בריצת עדכון, להפעיל BAPI_0050_CREATE  (לפי התיעוד  API  BudgetEntryDocFM.CREATE לא מאפשר תקציב תקופתי):
+HEADER_DATA	ערך
+FM_AREA	'1000'
+VERSION	'000'
+DOCDATE	תאריך נוכחי
+PSTNG_DATE	תאריך אחרון של "תקופת חתך" מהפרמטרים של התוכנית
+DOCTYPE	לשלוף ערך של פרמטר ZFM_REFRESH_BUDDOC מ-ZCA_PARAM
+DOCSTATE	'1'
+PROCESS	'ENTR'
+EXTERNAL_NUMBER	ריק
+HEADER_DATA_ADD	
+HEADER_TEXT	תקציב כריכים-<תקופת חתך>
+TESTRUN	ריק
+UPDATE_MODE	'1'
+ITEM_DATA	להוסיף 2 שורות (פלוס ומינוס) עבור כל שורה ב- ZCO_REFRESHMENTCOST כאשר FISCALYEARPERIOD שווה לתקופת חתך ממסך הפרמטרים.
+הערכים בשדות זהים ב-2 השורות למעט FUNDS_CTR ו-TOTAL_AMOUNT, פירוט בהמשך
+ITEM_NUM	מספר רץ החל מ-1
+FISC_YEAR	שנה מ- FISCALYEARPERIOD ב- ZCO_REFRESHMENTCOST
+CASH_YEAR	כמו FISC_YEAR
+BUDCAT	'F9'
+BUDTYPE	לשלוף ערך של פרמטר ZFM_UPD_BUDTYPE מ-ZCA_PARAM
+FUND	
+FUNDS_CTR	בשורה ראשונה - לקחת COSCENTER מהשורה ב- ZCO_REFRESHMENTCOST
+בשורה שנייה – לקחת FUNDSCENTER ממסך פרמטרים של התוכנית
+CMMT_ITEM	COMMITMENTITEM ממסך פרמטרים
+VALTYPE	'B1'
+TRANS_CURR	'ILS'
+TOTAL_AMOUNT	בשורה ראשונה - BUDGETAMOUNT מהשורה ב- ZCO_REFRESHMENTCOST
+בשורה שנייה – אותו סכום כפול (1-)
+PERIOD_DATA	מקביל ל-ITEM_DATA, מיועד להבטיח שהתקציב מתעדכן בתקופה הנכונה
+ITEM_NUM	מקביל ל-ITEM_NUM ב-ITEM_DATA
+BUDGETING_PERIOD	חודש מ- FISCALYEARPERIOD ב- ZCO_REFRESHMENTCOST. לדוגמה לקחת 09 מ-202609.
+PERIOD_AMOUNT	TOTAL_AMOUNT משורה מקבילה ב-ITEM_DATA
+
+22.	יצירת CDS שמחבר בין הנתונים הכספיים לנתונים סטטיסטיים – ליצור ZCO_ActWithSKF, עם @Analytics.dataCategory: #CUBE ו-@Metadata.ignorePropagatedAnnotations:
+-	לקחת I_JOURNALENTRYITEMCUBE עם הסינון הבא (פירוט השדות הנדרשים בסעיף הבא):
+o	LEDGER = '0L'
+o	COSTCENTER לא ריק
+-	לקחת את השדות הבאים של I_JOURNALENTRYITEMCUBE ראשון ולשעות Group בהתאם של AMOUNTINCOMPANYCODECURRENCY ו-QUANTITY – נניח שהתוצאה תהיה ב-ZI_CO_Journal10. לעשות Union All עם I_FINSTATISTICALKEYFIGUREITEM לתוך ZCO_ActWithSKF (עמודה שמאלית מפרטת את ערכים, רק את השדות האלה צריך לקחת מ-CDS שני).
+שדה ב- ZI_CO_Journal10	לוגיקה ב-Union All (Cast) עם I_FINSTATISTICALKEYFIGUREITEM
+LEDGER	לקבוע 'L0'
+COMPANYCODE + COMPANYCODENAME	ערך מ-I_FinStatisticalKeyFigureItem
+FISCALYEAR	ערך מ-I_FinStatisticalKeyFigureItem
+BUSINESSTRANSACTION	ריק
+GLACCOUNT + GLACCOUNTLONGNAME	ריק
+COSTCENTER + COSTCENTERNAME	ערך מ-I_FinStatisticalKeyFigureItem
+PROFITCENTER	ריק
+FUNCTIONALAREA + FUNCTIONALAREANAME	ריק
+PARTNERCOSTCENTER + PARTNERCOSTCENTERNAME	ריק
+AMOUNTINCOMPANYCODECURRENCY + COMPANYCODECURRENCY	ריק
+QUANTITY + BASEUNIT	ריק
+FISCALPERIOD	ערך מ-I_FinStatisticalKeyFigureItem
+ACCOUNTINGDOCUMENTTYPE + ACCOUNTINGDOCUMENTTYPENAME	ריק
+PURCHASINGDOCUMENT	ריק
+PURCHASINGDOCUMENTITEM	ריק
+COSTCTRACTIVITYTYPE	ריק
+ORDERID	ריק
+COMMITMENTITEM	ריק
+FUNDSCENTER	ערך של CostCenter מ-I_FinStatisticalKeyFigureItem
+FUNDEDPROGRAM	ריק
+FUND	ריק
+BUDGETPERIOD	ריק
+ZZ1_UNIT_TYPE_COS	ריק
+ZZ1_CC_CLASS_COS	ריק
+ZZ1_IFALLOCUNIT_COS	ריק
+PARENTNODE	ריק
+PARENTNODE2	ריק
+COSTCENTERHIERARCHYNAME	ריק
+תוספת שדות מ- I_FINSTATISTICALKEYFIGUREITEM
+STATISTICALKEYFIGURE	ריק בשורות של I_JOURNALENTRYITEMCUBE
+STATISTICALKEYFIGUREQUANTITY	
+
+-	ליצור CDS ZFM_BudActWithSKF  מהלך דומה לחיבור בין נתוני תקציב ונתונים סטטיסטיים ב-ZCO_ActWithSKF מהסעיף הקודם – כמו סעיף קודם, רק CDS בסיסי - I_FUNDSMGMTBDGTWTHPERDACTLCUBE:
+שדה	לוגיקה ב-Union All (Cast) עם I_FINSTATISTICALKEYFIGUREITEM
+FNDSMGMTANALYSISSOURCETECH	לקבוע '3'
+FINANCIALMANAGEMENTAREA	לקבוע '1000'
+COMMITMENTITEM	ערך מ-I_FinStatisticalKeyFigureItem
+BUDGETPERIOD	ריק
+FUNCTIONALAREA	ריק
+FUND	לקבוע '10'
+FUNDEDPROGRAM	ריק
+FUNDSCENTER	ערך של CostCenter מ-I_FinStatisticalKeyFigureItem
+COMPANYCODE	ערך מ-I_FinStatisticalKeyFigureItem
+GLACCOUNT	ריק
+FINMGMTAREAFISCALYEAR	ערך של FiscalYear מ-I_FinStatisticalKeyFigureItem
+FINMGMTAREAPERIOD	ערך של FiscalPeriod מ-I_FinStatisticalKeyFigureItem
+BUDGETAMOUNTINFMACRCY	ריק
+FINANCIALMANAGEMENTAREACRCY	ריק
+CMTMTOPENITEMAMOUNTINFMACRCY	ריק
+CTRLGITEMAMOUNTINFMACRCY	ריק
+FNDSMGMTACTLAMOUNTINTRANSCRCY	ריק
+CTRLGITEMAMOUNTINTRANSCRCY	ריק
+FUNDSMGMTVALUETYPE	ריק
+BUDGETCATEGORY	ריק
+BUDGETTYPE	ריק
+BUDGETVERSION	ריק
+PURCHASEORDER	ריק
+ZZ1_BUDGETUNITFICTR_COS	ערך של CostCenter מ-I_FinStatisticalKeyFigureItem
+תוספת שדות מ- I_FINSTATISTICALKEYFIGUREITEM
+STATISTICALKEYFIGURE	ריק בשורות של I_FUNDSMGMTBDGTWTHPERDACTLCUBE
+STATISTICALKEYFIGUREQUANTITY	
+
+23.	הרשאות 
+אריחים של אפליקציות חדשות יתווספו לרולים המתאימים.
+24.	בדיקות נדרשות לבחינת הפיתוח
+	בדיקה	פירוט	עבר / כשל
+1			
+
+
