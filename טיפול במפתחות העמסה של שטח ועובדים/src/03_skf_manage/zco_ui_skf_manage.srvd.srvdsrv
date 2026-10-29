@@ -1,0 +1,7 @@
+@EndUserText.label: 'עדכון מפתחות העמסה - שירות UI'
+define service ZCO_UI_SKF_MANAGE {
+  expose ZCO_C_SKFPOSTINGPREVIEW as SkfPostingPreview;
+  expose ZCO_RESTATKEYDATATOT    as AreaSummary;
+  expose ZCO_RESTATKEYDATADET    as AreaDetails;
+  expose ZCO_I_SkfTopicVH        as SkfTopicVH;
+}

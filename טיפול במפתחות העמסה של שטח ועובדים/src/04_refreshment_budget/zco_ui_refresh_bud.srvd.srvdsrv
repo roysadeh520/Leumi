@@ -1,0 +1,4 @@
+@EndUserText.label: 'תקציב כיבוד בסניפים - שירות UI'
+define service ZCO_UI_REFRESH_BUD {
+  expose ZCO_REFRESHMENTCOST as RefreshmentCost;
+}
