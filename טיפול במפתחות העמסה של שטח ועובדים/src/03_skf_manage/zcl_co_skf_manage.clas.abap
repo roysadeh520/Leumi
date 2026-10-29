@@ -227,7 +227,7 @@ CLASS zcl_co_skf_manage IMPLEMENTATION.
     DATA(lv_first_day) = first_day( iv_period ).
     DATA(lv_last_day)  = last_day( iv_period ).
 
-    " סעיף 8: כלל ייחוס בתוקף בתקופת החתך; בנוסף רק מדידות שבתוקף בתקופה (ראה שאלות פתוחות 5).
+    " סעיף 8: כלל ייחוס בתוקף בתקופת החתך; בנוסף רק מדידות שבתוקף בתקופה (ראה שאלות פתוחות 2).
     " מפתח סטטיסטי = סוג המדידה (R100/R101), רישום ביום האחרון של התקופה
     SELECT FROM zco_restatkeydatatot
       FIELDS @lv_last_day AS posting_date,

@@ -24,7 +24,7 @@ ENDCLASS.
 CLASS lhc_preview IMPLEMENTATION.
 
   METHOD get_global_authorizations.
-    " ההרשאה נקבעת ברמת האפליקציה (Business Catalog) - ראה שאלות פתוחות 15
+    " ההרשאה נקבעת ברמת האפליקציה (Business Catalog) - ראה שאלות פתוחות 12
     result-%action-postdocuments = if_abap_behv=>auth-allowed.
   ENDMETHOD.
 
@@ -99,7 +99,7 @@ ENDCLASS.
 CLASS lsc_saver IMPLEMENTATION.
 
   METHOD save.
-    " רישום בלי COMMIT - RAP מבצע את ה-COMMIT בסוף השמירה (ראה שאלות פתוחות 0)
+    " רישום בלי COMMIT - RAP מבצע את ה-COMMIT בסוף השמירה (ראה שאלות פתוחות T1)
     DATA(lo_poster) = NEW zcl_co_skf_poster_bapi( ).
 
     LOOP AT lcl_buffer=>gt_documents INTO DATA(ls_document).

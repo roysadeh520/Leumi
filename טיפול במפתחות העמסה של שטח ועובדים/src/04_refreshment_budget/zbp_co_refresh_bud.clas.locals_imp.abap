@@ -119,7 +119,7 @@ CLASS lcl_budget_builder IMPLEMENTATION.
       budgeting_period = lv_period+4(3) ).
 
     LOOP AT it_rows INTO DATA(ls_row) WHERE budget_amount <> 0.
-      " TODO(OPEN): הונח שמרכז הקרנות של הסניף = מרכז העלות (ראה שאלות פתוחות 18)
+      " TODO(OPEN): הונח שמרכז הקרנות של הסניף = מרכז העלות (ראה שאלות פתוחות 16)
       DATA(ls_branch) = ls_template.
       ls_branch-item_number  = lines( es_document-items ) + 1.
       ls_branch-funds_center = ls_row-cost_center.
@@ -258,7 +258,7 @@ ENDCLASS.
 CLASS lsc_saver IMPLEMENTATION.
 
   METHOD save.
-    " רישום בלי COMMIT - RAP מבצע את ה-COMMIT בסוף השמירה (ראה שאלות פתוחות 0)
+    " רישום בלי COMMIT - RAP מבצע את ה-COMMIT בסוף השמירה (ראה שאלות פתוחות T1)
     LOOP AT lcl_buffer=>gt_documents INTO DATA(ls_document).
       DATA(ls_result) = NEW zcl_fm_budget_poster_bapi( )->post( is_document = ls_document
                                                                 iv_test_run = abap_false
