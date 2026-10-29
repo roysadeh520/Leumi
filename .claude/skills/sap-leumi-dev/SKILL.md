@@ -1,6 +1,6 @@
 ---
 name: sap-leumi-dev
-description: SAP ABAP development for Bank Leumi from a spec (אפיון) - analyze the spec, plan together with the user (objects, Clean Core levels, open questions) and only then develop in ABAP Cloud / RAP / CDS with as few objects as possible, and deliver to the Leumi repo with a single README and an open-questions file. Use whenever the user shares or points to a Leumi spec, asks to develop / plan / analyze an SAP development for Leumi (פיתוח, אפיון, CDS, RAP, אפליקציה, ממשק, ג'וב, BAPI, Clean Core), or asks to continue such a development. For outbound interface classes it combines with sap-application-job.
+description: SAP ABAP development for Bank Leumi from a spec (אפיון) - analyze the spec, plan together with the user (objects, Clean Core C/D items for approval, open questions) and only then develop in ABAP Cloud / RAP / CDS with as few files as possible while keeping a correct design, and deliver to the Leumi repo with a single README and an open-questions file. Use whenever the user shares or points to a Leumi spec, asks to develop / plan / analyze an SAP development for Leumi (פיתוח, אפיון, CDS, RAP, אפליקציה, ממשק, ג'וב, BAPI, Clean Core), or asks to continue such a development. For outbound interface classes it combines with sap-application-job.
 ---
 
 # SAP development for Bank Leumi - from spec to delivery
@@ -28,8 +28,8 @@ Present the plan in Hebrew, short and in tables, then **wait for approval**. Ask
 
 The plan contains:
 
-1. **Object list in creation order.** For each object: type, name, one-line purpose, **why it is needed**. Aim for the minimum (see "Minimum objects").
-2. **Clean Core level per component** (A / B / C / D, see below). **Every C or D item must be explicitly approved by the user**, with the reason and the alternatives that were checked.
+1. **Object list in creation order.** For each object: type, name, one-line purpose, **why it is needed**. Aim for the minimum (see "Minimum files").
+2. **Clean Core: flag only C and D.** No need to rate every component. **Every C or D item must be listed explicitly and approved by the user**, with the reason and the alternatives that were checked.
 3. **Fixed decision points.** Always ask these unless the spec answers them clearly:
    - Update from the app (RAP button, immediate result on screen) or in the background (Application Job)?
    - Is scheduling needed now? (If yes → job.)
@@ -53,13 +53,15 @@ Only after an explicit "yes" from the user, go to phase 3.
 
 Packages: one **Standard ABAP** package for wrappers and C-level objects (`Z<MOD>_<DEV>_WRAPPER`), one **ABAP for Cloud Development** package for everything else.
 
-### Minimum objects
-- One logic class per app at most. Helpers are **private methods** or **local classes** (`locals_def` / `locals_imp`), not global classes.
-- **No interfaces** unless there are two real implementations. No separate builder / reader / logger / period classes.
-- No exception class or message class of our own. Use a local exception (`lcx_error` in `locals_def`) or return an error text. Use a team object if one exists (see `references/team-objects.md`).
-- RAP behavior pool = its own class (mandatory). If the list is a CDS view (not a custom entity), put the app logic in the behavior pool's local types; no extra class.
+### Minimum files, correct design
+The goal is **as few files as possible while keeping the development correct**. Every file must earn its place.
+- Prefer **private methods** or **local classes** (`locals_def` / `locals_imp`) over a new global class when the helper is used only inside one class.
+- A new global object (class, interface, exception class, message class…) is fine **when it is justified** (reuse across apps, required by the framework, real separation of concerns). State the reason in the plan.
+- Use team objects when they exist (see `references/team-objects.md`) instead of creating new ones.
+- RAP behavior pool = its own class (mandatory). If the list is a CDS view (not a custom entity), the app logic can live in the behavior pool's local types.
 - Custom entity only when the list must be computed in ABAP. Otherwise a root view entity is the BO.
-- **No unit tests** unless the user asks for them.
+- **No unit tests** for now, unless the user asks for them.
+- **When "fewer files" and "correct design" conflict, show both options and decide with the user before developing.**
 - Every object must appear in the plan with its reason. If you need one that was not in the plan, ask first.
 
 ### Which pattern
@@ -102,7 +104,7 @@ Templates: `references/deliverable-templates.md`.
 
 ### README.md - one file, in creation order
 - Short "how it works" for the user (test-run list, update button, what is shown).
-- Clean Core table and the number of classes with the reason for each.
+- Components at Clean Core level C or D (if any) with the approval, and every class with the reason it exists.
 - "What you paste and what is generated": 📋 = file in `src/` to paste into the object created in ADT; ⚙️ = generated or a form (service binding, Fiori app, IAM app, business catalog, domain, data element).
 - Steps 0…N: settings for the consultant, packages, wrappers + C1 release, CDS, RAP (BDEF → Ctrl+1 creates the behavior pool → paste), service definition + binding + Preview test, Fiori app from the binding, IAM app / business catalog / role.
 - Tests table (functional checks, no unit tests) and common problems.
