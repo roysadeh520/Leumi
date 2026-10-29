@@ -9,23 +9,69 @@ CLASS zcl_co_skf_poster_bapi DEFINITION
   CREATE PUBLIC.
 
   PUBLIC SECTION.
-    INTERFACES zif_co_skf_poster.
+    " טיפוסים מובנים בלבד - כדי לא לחשוף טיפוסי DDIC לא משוחררים לקוד ה-ABAP Cloud
+    TYPES ty_quantity TYPE p LENGTH 16 DECIMALS 3.
+
+    TYPES:
+      BEGIN OF ty_item,
+        statistical_key_figure TYPE c LENGTH 6,
+        cost_center            TYPE c LENGTH 10,
+        fiscal_year            TYPE n LENGTH 4,
+        fiscal_period          TYPE n LENGTH 3,
+        quantity               TYPE ty_quantity,
+        quantity_unit          TYPE c LENGTH 3,
+      END OF ty_item,
+      ty_items TYPE STANDARD TABLE OF ty_item WITH EMPTY KEY.
+
+    TYPES:
+      BEGIN OF ty_document,
+        controlling_area TYPE c LENGTH 4,
+        posting_date     TYPE d,
+        document_date    TYPE d,
+        header_text      TYPE c LENGTH 50,
+        items            TYPE ty_items,
+      END OF ty_document,
+      ty_documents TYPE STANDARD TABLE OF ty_document WITH EMPTY KEY.
+
+    TYPES:
+      BEGIN OF ty_message,
+        type TYPE c LENGTH 1,
+        text TYPE string,
+      END OF ty_message,
+      ty_messages TYPE STANDARD TABLE OF ty_message WITH EMPTY KEY.
+
+    TYPES:
+      BEGIN OF ty_result,
+        is_success      TYPE abap_boolean,
+        document_number TYPE c LENGTH 10,
+        messages        TYPE ty_messages,
+      END OF ty_result.
+
+    "! בדיקה בלבד - ללא שינוי ב-DB (ריצת מבחן)
+    METHODS check
+      IMPORTING is_document      TYPE ty_document
+      RETURNING VALUE(rs_result) TYPE ty_result.
+
+    "! רישום + COMMIT. בכשל: ROLLBACK והודעות בתוצאה
+    METHODS post
+      IMPORTING is_document      TYPE ty_document
+      RETURNING VALUE(rs_result) TYPE ty_result.
 
   PRIVATE SECTION.
     TYPES ty_bapi_items  TYPE STANDARD TABLE OF bapiskfitm WITH EMPTY KEY.
     TYPES ty_bapi_return TYPE STANDARD TABLE OF bapiret2 WITH EMPTY KEY.
 
     METHODS to_bapi_header
-      IMPORTING is_document      TYPE zif_co_skf_poster=>ty_document
+      IMPORTING is_document      TYPE ty_document
       RETURNING VALUE(rs_header) TYPE bapidochdru12p.
 
     METHODS to_bapi_items
-      IMPORTING it_items        TYPE zif_co_skf_poster=>ty_items
+      IMPORTING it_items        TYPE ty_items
       RETURNING VALUE(rt_items) TYPE ty_bapi_items.
 
     METHODS to_messages
       IMPORTING it_return          TYPE ty_bapi_return
-      RETURNING VALUE(rt_messages) TYPE zif_co_bapi_messages=>ty_messages.
+      RETURNING VALUE(rt_messages) TYPE ty_messages.
 
     METHODS has_error
       IMPORTING it_return           TYPE ty_bapi_return
@@ -36,7 +82,7 @@ ENDCLASS.
 
 CLASS zcl_co_skf_poster_bapi IMPLEMENTATION.
 
-  METHOD zif_co_skf_poster~check.
+  METHOD check.
     DATA lt_items  TYPE ty_bapi_items.
     DATA lt_return TYPE ty_bapi_return.
 
@@ -52,10 +98,10 @@ CLASS zcl_co_skf_poster_bapi IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_co_skf_poster~post.
-    DATA lt_items     TYPE ty_bapi_items.
-    DATA lt_return    TYPE ty_bapi_return.
-    DATA lv_doc_no    TYPE bapidochdru12p-doc_no.
+  METHOD post.
+    DATA lt_items  TYPE ty_bapi_items.
+    DATA lt_return TYPE ty_bapi_return.
+    DATA lv_doc_no TYPE bapidochdru12p-doc_no.
 
     lt_items = to_bapi_items( is_document-items ).
 
@@ -102,10 +148,8 @@ CLASS zcl_co_skf_poster_bapi IMPLEMENTATION.
 
   METHOD to_messages.
     rt_messages = VALUE #( FOR ls_return IN it_return
-                           ( type   = ls_return-type
-                             id     = ls_return-id
-                             number = ls_return-number
-                             text   = ls_return-message ) ).
+                           ( type = ls_return-type
+                             text = ls_return-message ) ).
   ENDMETHOD.
 
 
