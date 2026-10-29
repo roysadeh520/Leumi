@@ -1,21 +1,29 @@
-// תצוגת ריצת מבחן ב-Fiori (List Report) - "עדכון מפתחות העמסה"
-// מציג בדיוק את השורות שה-Job ירשום, מאותו Builder (מקור אמת אחד).
+// "עדכון מפתחות העמסה" (ZCO_SKF_MANAGE) - Fiori List Report
+// הרשימה = ריצת מבחן: בדיוק השורות שיירשמו. הכפתור "בצע עדכון" = ריצת עדכון (BDEF).
+// תקופה ונושא הם מסננים חובה (ולא פרמטרים - RAP BO לא תומך ב-CDS עם פרמטרים).
 // לנושא P1: מעבר מהשורה לפירוט נתוני השטח (ZCO_RESTATKEYDATADET) לפי מרכז עלות.
-@EndUserText.label: 'עדכון מפתחות העמסה - תצוגה מקדימה'
-@ObjectModel.query.implementedBy: 'ABAP:ZCL_CO_SKF_PREVIEW_QUERY'
+@EndUserText.label: 'עדכון מפתחות העמסה'
+@ObjectModel.query.implementedBy: 'ABAP:ZCL_CO_SKF_MANAGE'
 @UI.headerInfo: { typeName: 'שורת רישום', typeNamePlural: 'שורות רישום',
                   title: { value: 'StatisticalKeyFigure' }, description: { value: 'CostCenter' } }
-define custom entity ZCO_C_SKFPOSTINGPREVIEW
-  with parameters
-    @EndUserText.label: 'תקופת חתך (YYYYPPP)'
-    P_FiscalYearPeriod : fis_jahrper,
-    @EndUserText.label: 'נושא'
-    @Consumption.valueHelpDefinition: [{ entity: { name: 'ZCO_I_SkfTopicVH', element: 'Topic' } }]
-    P_Topic            : zco_skf_topic
+define root custom entity ZCO_C_SKFPOSTINGPREVIEW
 {
       @UI.facet: [ { id: 'Item', purpose: #STANDARD, type: #IDENTIFICATION_REFERENCE, label: 'שורת רישום', position: 10 },
                    { id: 'AreaDetails', purpose: #STANDARD, type: #LINEITEM_REFERENCE, label: 'פירוט נתוני שטח',
                      position: 20, targetElement: '_AreaDetails' } ]
+      @UI.selectionField: [{ position: 10 }]
+      @Consumption.filter: { mandatory: true, selectionType: #SINGLE, multipleSelections: false }
+      @EndUserText.label: 'תקופת חתך (YYYYPPP)'
+      // כפתור העדכון ברשימה; התקופה והנושא מוזנים בחלון הפעולה
+      @UI.lineItem: [{ type: #FOR_ACTION, dataAction: 'postDocuments', label: 'בצע עדכון' }]
+  key FiscalYearPeriod     : fis_jahrper;
+
+      @UI.selectionField: [{ position: 20 }]
+      @Consumption.filter: { mandatory: true, selectionType: #SINGLE, multipleSelections: false }
+      @Consumption.valueHelpDefinition: [{ entity: { name: 'ZCO_I_SkfTopicVH', element: 'Topic' } }]
+      @EndUserText.label: 'נושא'
+  key Topic                : zco_skf_topic;
+
       @UI.hidden: true
   key DocumentIndex        : abap.int4;
       @UI.hidden: true
@@ -40,14 +48,6 @@ define custom entity ZCO_C_SKFPOSTINGPREVIEW
       CostCenter           : abap.char( 10 );
 
       @UI.lineItem: [{ position: 50 }]
-      @EndUserText.label: 'שנה'
-      FiscalYear           : abap.numc( 4 );
-
-      @UI.lineItem: [{ position: 60 }]
-      @EndUserText.label: 'תקופה'
-      FiscalPeriod         : abap.numc( 3 );
-
-      @UI.lineItem: [{ position: 70 }]
       @UI.identification: [{ position: 30 }]
       @EndUserText.label: 'כמות'
       @Semantics.quantity.unitOfMeasure: 'QuantityUnit'

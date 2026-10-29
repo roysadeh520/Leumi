@@ -1,0 +1,11 @@
+// "בצע עדכון": הפעולה בונה את המסמך ובודקת אותו (TESTRUN של BAPI_0050_CREATE),
+// הרישום ב-save - RAP מבצע את ה-COMMIT.
+unmanaged implementation in class zbp_co_refresh_bud unique;
+strict ( 2 );
+
+define behavior for ZCO_REFRESHMENTCOST alias RefreshmentCost
+lock master
+authorization master ( global )
+{
+  static action postBudget parameter ZCO_A_REFRESHBUDPARAM;
+}

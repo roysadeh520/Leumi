@@ -5,9 +5,6 @@
 @EndUserText.label: 'כמות מפתח סטטיסטי לסניף'
 @Metadata.ignorePropagatedAnnotations: true
 define view entity ZI_CO_BranchSkfQuantity
-  with parameters
-    P_FiscalYearPeriod     : fis_jahrper,
-    P_StatisticalKeyFigure : abap.char( 6 )
   as select from I_FinStatisticalKeyFigureItem as SkfItem
 
     // האפיון: right join עם I_CostCenter = רק סניפים. inner join נותן אותה תוצאה (סינון)
@@ -25,14 +22,12 @@ define view entity ZI_CO_BranchSkfQuantity
       sum( SkfItem.StatisticalKeyFigureQuantity ) as StatisticalKeyFigureQuantity,
       SkfItem.StatisticalKeyFigureUnit
 }
+// מרכז עלות בתוקף ביום הראשון של התקופה (I_CostCenter תלוי-זמן)
 where
-      SkfItem.FiscalYearPeriod     = $parameters.P_FiscalYearPeriod
-  and SkfItem.StatisticalKeyFigure = $parameters.P_StatisticalKeyFigure
-  // מרכז עלות בתוקף בתקופת החתך (I_CostCenter תלוי-זמן)
-  and Branch.ValidityStartDate     <= cast( concat( substring( $parameters.P_FiscalYearPeriod, 1, 4 ),
-                                                    concat( substring( $parameters.P_FiscalYearPeriod, 6, 2 ), '01' ) ) as abap.dats )
-  and Branch.ValidityEndDate       >= cast( concat( substring( $parameters.P_FiscalYearPeriod, 1, 4 ),
-                                                    concat( substring( $parameters.P_FiscalYearPeriod, 6, 2 ), '01' ) ) as abap.dats )
+      Branch.ValidityStartDate <= cast( concat( substring( SkfItem.FiscalYearPeriod, 1, 4 ),
+                                                concat( substring( SkfItem.FiscalYearPeriod, 6, 2 ), '01' ) ) as abap.dats )
+  and Branch.ValidityEndDate   >= cast( concat( substring( SkfItem.FiscalYearPeriod, 1, 4 ),
+                                                concat( substring( SkfItem.FiscalYearPeriod, 6, 2 ), '01' ) ) as abap.dats )
 group by
   SkfItem.ControllingArea,
   SkfItem.CompanyCode,

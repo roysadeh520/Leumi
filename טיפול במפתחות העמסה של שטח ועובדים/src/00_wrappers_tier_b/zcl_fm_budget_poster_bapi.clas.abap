@@ -61,10 +61,13 @@ CLASS zcl_fm_budget_poster_bapi DEFINITION
         messages        TYPE ty_messages,
       END OF ty_result.
 
-    "! iv_test_run = X: בדיקה בלבד ללא עדכון (TESTRUN של ה-BAPI)
+    "! @parameter iv_test_run | X = בדיקה בלבד ללא עדכון (TESTRUN של ה-BAPI)
+    "! @parameter iv_commit   | X = ה-Wrapper מבצע COMMIT/ROLLBACK בעצמו (קריאה מ-Job / דוח).
+    "!                         ' ' = מתוך RAP: RAP מבצע את ה-COMMIT, אסור לבצע אותו כאן.
     METHODS post
       IMPORTING is_document      TYPE ty_document
                 iv_test_run      TYPE abap_boolean
+                iv_commit        TYPE abap_boolean DEFAULT abap_true
       RETURNING VALUE(rs_result) TYPE ty_result.
 
   PRIVATE SECTION.
@@ -122,14 +125,18 @@ CLASS zcl_fm_budget_poster_bapi IMPLEMENTATION.
                 return          = lt_return.
 
     IF has_error( lt_return ) OR iv_test_run = abap_true.
-      CALL FUNCTION 'BAPI_TRANSACTION_ROLLBACK'.
+      IF iv_commit = abap_true.
+        CALL FUNCTION 'BAPI_TRANSACTION_ROLLBACK'.
+      ENDIF.
       rs_result = VALUE #( is_success = xsdbool( NOT has_error( lt_return ) )
                            messages   = to_messages( lt_return ) ).
       RETURN.
     ENDIF.
 
-    CALL FUNCTION 'BAPI_TRANSACTION_COMMIT'
-      EXPORTING wait = abap_true.
+    IF iv_commit = abap_true.
+      CALL FUNCTION 'BAPI_TRANSACTION_COMMIT'
+        EXPORTING wait = abap_true.
+    ENDIF.
 
     rs_result = VALUE #( is_success      = abap_true
                          document_year   = lv_doc_year

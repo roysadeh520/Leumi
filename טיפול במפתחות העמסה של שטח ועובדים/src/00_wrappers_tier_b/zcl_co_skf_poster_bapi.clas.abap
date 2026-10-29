@@ -52,9 +52,12 @@ CLASS zcl_co_skf_poster_bapi DEFINITION
       IMPORTING is_document      TYPE ty_document
       RETURNING VALUE(rs_result) TYPE ty_result.
 
-    "! רישום + COMMIT. בכשל: ROLLBACK והודעות בתוצאה
+    "! רישום. בכשל: הודעות בתוצאה.
+    "! @parameter iv_commit | X = ה-Wrapper מבצע COMMIT/ROLLBACK בעצמו (קריאה מ-Job / דוח).
+    "!                       ' ' = מתוך RAP save: RAP מבצע את ה-COMMIT, אסור לבצע אותו כאן.
     METHODS post
       IMPORTING is_document      TYPE ty_document
+                iv_commit        TYPE abap_boolean DEFAULT abap_true
       RETURNING VALUE(rs_result) TYPE ty_result.
 
   PRIVATE SECTION.
@@ -112,14 +115,18 @@ CLASS zcl_co_skf_poster_bapi IMPLEMENTATION.
                 return     = lt_return.
 
     IF has_error( lt_return ).
-      CALL FUNCTION 'BAPI_TRANSACTION_ROLLBACK'.
+      IF iv_commit = abap_true.
+        CALL FUNCTION 'BAPI_TRANSACTION_ROLLBACK'.
+      ENDIF.
       rs_result = VALUE #( is_success = abap_false
                            messages   = to_messages( lt_return ) ).
       RETURN.
     ENDIF.
 
-    CALL FUNCTION 'BAPI_TRANSACTION_COMMIT'
-      EXPORTING wait = abap_true.
+    IF iv_commit = abap_true.
+      CALL FUNCTION 'BAPI_TRANSACTION_COMMIT'
+        EXPORTING wait = abap_true.
+    ENDIF.
 
     rs_result = VALUE #( is_success      = abap_true
                          document_number = lv_doc_no

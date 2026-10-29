@@ -1,0 +1,11 @@
+// "בצע עדכון": הפעולה בונה את המסמכים (interaction phase),
+// הבדיקה ב-BAPI_ACC_STAT_KEY_FIG_CHECK (check_before_save) והרישום ב-save - RAP מבצע את ה-COMMIT.
+unmanaged implementation in class zbp_co_skf_manage unique;
+strict ( 2 );
+
+define behavior for ZCO_C_SKFPOSTINGPREVIEW alias Preview
+lock master
+authorization master ( global )
+{
+  static action postDocuments parameter ZCO_A_SKFPOSTPARAM;
+}
