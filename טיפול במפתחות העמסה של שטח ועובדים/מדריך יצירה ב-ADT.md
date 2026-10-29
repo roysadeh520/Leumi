@@ -156,23 +156,22 @@ New → Data Definition, לפי הסדר הזה:
 
 ## שלב 8 - אפליקציות Fiori ואריחים
 
-### 8.1 יצירת אפליקציית Fiori (ב-SAP Business Application Studio, לכל אפליקציה)
-1. **Fiori: Open Application Generator** → **List Report Page**.
-2. Data Source: **Connect to a System** → בוחרים את המערכת → Service: `ZCO_UI_SKF_MANAGE_O4`.
-   - באפליקציה השנייה: `ZCO_UI_REFRESH_BUD_O4`.
+### 8.1 יצירת אפליקציית Fiori ישירות מה-RAP (ב-ADT, לכל אפליקציה)
+1. קליק ימני על ה-Service Binding → **Create SAP Fiori App**.
+   - אפליקציה 1: `ZCO_UI_SKF_MANAGE_O4`.
+   - אפליקציה 2: `ZCO_UI_REFRESH_BUD_O4`.
+2. Template: **List Report**.
 3. Main Entity:
    - אפליקציה 1: `SkfPostingPreview`.
    - אפליקציה 2: `RefreshmentCost`.
-4. שם המודול:
-   - אפליקציה 1: `zco_skf_manage`, כותרת "עדכון מפתחות העמסה".
-   - אפליקציה 2: `zco_refresh_bud`, כותרת "טיפול בתקציב כיבוד בסניפים".
-5. **Add deployment configuration** → ABAP → BSP: `ZCO_SKF_MANAGE` / `ZCO_REFRESH_BUD`, חבילה `ZCO_SKF`.
-6. **Add FLP configuration**:
-   - Semantic Object: `ZCOSKF`, Action: `manage`.
-   - באפליקציה השנייה: Semantic Object `ZCOREFRESH`, Action `manage`.
-7. `npm run deploy`.
+4. שם וכותרת:
+   - אפליקציה 1: `ZCO_SKF_MANAGE`, "עדכון מפתחות העמסה".
+   - אפליקציה 2: `ZCO_REFRESH_BUD`, "טיפול בתקציב כיבוד בסניפים".
+5. חבילה `ZCO_SKF` + Transport → Finish.
 
-> כל ההגדרות של המסך (עמודות, מסננים, הכפתור) כבר מוגדרות באנוטציות `@UI` ב-CDS. אין צורך לשנות קוד ב-BAS.
+האשף יוצר ופורס את האפליקציה ואת ה-Launchpad App Descriptor. אין קוד לכתוב: המסך (עמודות, מסננים והכפתור) נבנה מהאנוטציות `@UI` ב-CDS.
+
+> אם האפשרות לא מופיעה בתפריט, גרסת ה-ADT או המערכת ישנה מדי. במקרה כזה, אותו אשף זמין ב-BAS / VS Code (SAP Fiori tools → Application Generator).
 
 ### 8.2 הרשאות ואריח (ב-ADT, לכל אפליקציה)
 1. **IAM App:** קליק ימני על החבילה → New → Other → **IAM App**.
